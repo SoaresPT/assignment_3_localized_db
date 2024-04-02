@@ -44,5 +44,4 @@ Checking the DB:
 
 - JavaFX: For building the graphical user interface.
 - SQLite: For database management.
-- Maven: For project man![Screenshot_20240402_113146](https://github.com/SoaresPT/assignment_3_localized_db/assets/9897471/ab3dade0-35c4-422f-afa6-d8d38cde63f7)
-agement and dependency handling.
+- Maven: For project management and dependency handling.
