@@ -10,7 +10,6 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 
-import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -30,6 +29,7 @@ public class LocalizationApp extends Application {
     private TextField emailInput;
     private Label selectLanguageLabel;
     private ComboBox<String> languageSelector;
+    private Label saveStatusLabel;
 
     @Override
     public void start(Stage primaryStage) {
@@ -62,6 +62,7 @@ public class LocalizationApp extends Application {
         lastNameInput = new TextField();
         emailInput = new TextField();
         saveButton = new Button();
+        saveStatusLabel = new Label();
 
         grid.add(selectLanguageLabel, 0, 0);
         grid.add(languageSelector, 1, 0);
@@ -72,12 +73,13 @@ public class LocalizationApp extends Application {
         grid.add(emailLabel, 0, 3);
         grid.add(emailInput, 1, 3);
         grid.add(saveButton, 1, 4);
+        grid.add(saveStatusLabel, 0, 5, 2, 1);
 
-        Scene scene = new Scene(grid, 310, 200);
+        Scene scene = new Scene(grid, 310, 230);
         primaryStage.setScene(scene);
         primaryStage.show();
 
-        saveButton.setOnAction(e -> saveData(firstNameInput.getText(), lastNameInput.getText(), emailInput.getText(), languageSelector.getValue()));
+        saveButton.setOnAction(e -> saveData(primaryStage));
     }
 
     private void loadResourceBundle(Locale locale) {
@@ -106,35 +108,43 @@ public class LocalizationApp extends Application {
         };
     }
 
-    private void saveData(String firstName, String lastName, String email, String selectedLanguage) {
+    private void saveData(Stage primaryStage) {
         try {
-            String jdbcUrl = "jdbc:sqlite:src/main/resources/db/multilingual.db"; // Path to the SQLite database file
+            Class.forName("org.sqlite.JDBC");
+            String jdbcUrl = "jdbc:sqlite:src/main/resources/db/multilingual.db";
             Connection conn = DriverManager.getConnection(jdbcUrl);
 
-            String tableName;
-            switch (selectedLanguage) {
-                case "Farsi":
-                    tableName = "employee_fa";
-                    break;
-                case "Japanese":
-                    tableName = "employee_ja";
-                    break;
-                default:
-                    tableName = "employee_en"; // Default to English
-            }
+            String selectedLanguage = languageSelector.getValue();
+            String tableName = switch (selectedLanguage) {
+                case "Farsi" -> "employee_fa";
+                case "Japanese" -> "employee_ja";
+                default -> "employee_en"; // Default to English
+            };
 
             String sql = "INSERT INTO " + tableName + " (first_name, last_name, email) VALUES (?, ?, ?)";
             PreparedStatement statement = conn.prepareStatement(sql);
-            statement.setString(1, firstName);
-            statement.setString(2, lastName);
-            statement.setString(3, email);
+            statement.setString(1, firstNameInput.getText());
+            statement.setString(2, lastNameInput.getText());
+            statement.setString(3, emailInput.getText());
             statement.executeUpdate();
-            System.out.println(bundle.getString("message.saved"));
+
+            // Display save status message
+            saveStatusLabel.setText(bundle.getString("message.saved"));
+            // Clear input fields
+            clearInputFields();
+
             conn.close();
-        } catch (SQLException e) {
+        } catch (ClassNotFoundException | SQLException e) {
             e.printStackTrace();
         }
     }
+
+    private void clearInputFields() {
+        firstNameInput.clear();
+        lastNameInput.clear();
+        emailInput.clear();
+    }
+
     public static void main(String[] args) {
         launch(args);
     }
