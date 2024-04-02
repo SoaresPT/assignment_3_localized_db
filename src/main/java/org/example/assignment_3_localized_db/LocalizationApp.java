@@ -10,6 +10,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -107,9 +108,8 @@ public class LocalizationApp extends Application {
 
     private void saveData(String firstName, String lastName, String email, String selectedLanguage) {
         try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-            String jdbcUrl = "jdbc:mysql://localhost:3306/fxdemo";
-            Connection conn = DriverManager.getConnection(jdbcUrl, "root", "Test12");
+            String jdbcUrl = "jdbc:sqlite:src/main/resources/db/multilingual.db"; // Path to the SQLite database file
+            Connection conn = DriverManager.getConnection(jdbcUrl);
 
             String tableName;
             switch (selectedLanguage) {
@@ -131,11 +131,10 @@ public class LocalizationApp extends Application {
             statement.executeUpdate();
             System.out.println(bundle.getString("message.saved"));
             conn.close();
-        } catch (ClassNotFoundException | SQLException e) {
+        } catch (SQLException e) {
             e.printStackTrace();
         }
     }
-
     public static void main(String[] args) {
         launch(args);
     }
