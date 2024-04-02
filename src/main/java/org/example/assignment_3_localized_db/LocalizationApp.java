@@ -33,7 +33,7 @@ public class LocalizationApp extends Application {
     @Override
     public void start(Stage primaryStage) {
         setupUI(primaryStage);
-        loadResourceBundle(Locale.ENGLISH); // Load default language
+        loadResourceBundle(Locale.ENGLISH);
         updateUI(primaryStage);
     }
 
@@ -47,8 +47,6 @@ public class LocalizationApp extends Application {
             loadResourceBundle(getLocale(selectedLanguage));
             updateUI(primaryStage);
         });
-
-        primaryStage.setTitle("Localization Example");
 
         GridPane grid = new GridPane();
         grid.setPadding(new Insets(20, 20, 20, 20));
@@ -100,14 +98,11 @@ public class LocalizationApp extends Application {
     }
 
     private Locale getLocale(String language) {
-        switch (language) {
-            case "Farsi":
-                return new Locale("fa", "IR");
-            case "Japanese":
-                return Locale.JAPAN;
-            default:
-                return Locale.ENGLISH;
-        }
+        return switch (language) {
+            case "Farsi" -> new Locale("fa", "IR");
+            case "Japanese" -> Locale.JAPAN;
+            default -> Locale.ENGLISH;
+        };
     }
 
     private void saveData(String firstName, String lastName, String email, String selectedLanguage) {
