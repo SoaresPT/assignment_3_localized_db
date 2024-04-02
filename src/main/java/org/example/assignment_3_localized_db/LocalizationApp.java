@@ -28,23 +28,24 @@ public class LocalizationApp extends Application {
     private TextField lastNameInput;
     private TextField emailInput;
     private Label selectLanguageLabel;
+    private ComboBox<String> languageSelector;
 
     @Override
     public void start(Stage primaryStage) {
-        ComboBox<String> languageSelector = new ComboBox<>();
+        setupUI(primaryStage);
+        loadResourceBundle(Locale.ENGLISH); // Load default language
+        updateUI(primaryStage);
+    }
+
+    private void setupUI(Stage primaryStage) {
+        languageSelector = new ComboBox<>();
         languageSelector.getItems().addAll("English", "Farsi", "Japanese");
         languageSelector.setValue("English");
 
         languageSelector.setOnAction(event -> {
             String selectedLanguage = languageSelector.getValue();
-            if (selectedLanguage.equals("Farsi")) {
-                bundle = ResourceBundle.getBundle("messages", new Locale("fa", "IR"));
-            } else if (selectedLanguage.equals("Japanese")) {
-                bundle = ResourceBundle.getBundle("messages", Locale.JAPAN);
-            } else {
-                bundle = ResourceBundle.getBundle("messages", Locale.ENGLISH);
-            }
-            updateUI(primaryStage); // Update UI components
+            loadResourceBundle(getLocale(selectedLanguage));
+            updateUI(primaryStage);
         });
 
         primaryStage.setTitle("Localization Example");
@@ -55,16 +56,12 @@ public class LocalizationApp extends Application {
         grid.setHgap(10);
 
         selectLanguageLabel = new Label();
-
         firstNameLabel = new Label();
-        firstNameInput = new TextField();
-
         lastNameLabel = new Label();
-        lastNameInput = new TextField();
-
         emailLabel = new Label();
+        firstNameInput = new TextField();
+        lastNameInput = new TextField();
         emailInput = new TextField();
-
         saveButton = new Button();
 
         grid.add(selectLanguageLabel, 0, 0);
@@ -81,10 +78,11 @@ public class LocalizationApp extends Application {
         primaryStage.setScene(scene);
         primaryStage.show();
 
-        bundle = ResourceBundle.getBundle("messages", Locale.ENGLISH);
-        updateUI(primaryStage); // Update UI components
-
         saveButton.setOnAction(e -> saveData(firstNameInput.getText(), lastNameInput.getText(), emailInput.getText(), languageSelector.getValue()));
+    }
+
+    private void loadResourceBundle(Locale locale) {
+        bundle = ResourceBundle.getBundle("messages", locale);
     }
 
     private void updateUI(Stage primaryStage) {
@@ -93,13 +91,23 @@ public class LocalizationApp extends Application {
         lastNameLabel.setText(bundle.getString("label.lastName"));
         emailLabel.setText(bundle.getString("label.email"));
         saveButton.setText(bundle.getString("button.save"));
-        selectLanguageLabel.setText(bundle.getString("label.selectLanguage")); // Update selectLanguageLabel text
+        selectLanguageLabel.setText(bundle.getString("label.selectLanguage"));
 
         firstNameInput.setPromptText(bundle.getString("label.firstName"));
         lastNameInput.setPromptText(bundle.getString("label.lastName"));
         emailInput.setPromptText(bundle.getString("label.email"));
-        // Update "Select Language:" label text
         selectLanguageLabel.setText(bundle.getString("label.selectLanguage"));
+    }
+
+    private Locale getLocale(String language) {
+        switch (language) {
+            case "Farsi":
+                return new Locale("fa", "IR");
+            case "Japanese":
+                return Locale.JAPAN;
+            default:
+                return Locale.ENGLISH;
+        }
     }
 
     private void saveData(String firstName, String lastName, String email, String selectedLanguage) {
